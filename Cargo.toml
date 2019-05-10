@@ -1,0 +1,9 @@
+[package]
+name = "conspire"
+version = "0.1.0"
+authors = ["Syver <syver.storm.furru@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+num-traits = "0.2.6"
+ndarray = "0.12.1"
