@@ -1,7 +1,8 @@
 # Conspire
 
-Conspire provides a general, Rusty interface for creating plots. It supports multiple backends, so you can render
-to SVG, to a terminal, to an IPython viewer or to a browser as you see fit. 
+Conspire (named in the grand tradition of Sussman and Steele), provides a general, Rusty interface for creating
+plots. It supports multiple backends, so you can render to SVG, to a terminal, to an IPython viewer or to a browser
+as you see fit.
 
 *Beware*: In an extremely early stage, still settling on a design. Only has a single backend, only a few available
 plots, and will probably eat all your precious data (or maybe not, but who knows). 
@@ -35,8 +36,8 @@ use conspire::{Backend, PlotBuilder, Plot, Layer};
 use conspire::channels::{PositionX, PositionY, Color, Size};
 
 let layer1: Layer<f32, u8, u32> = Layer::new()
-   .x(&[1.0, 2.0, 3.0, 4.0])
-   .y(&[8.0, 7.0, 5.0, 4.0]);
+   .x(&[1.0, 1.3, 2.0, 1.7, 3.0, 4.0])
+   .y(&[8.0, 8.1, 7.0, 6.4, 5.0, 4.0]);
  
  let layer2: Layer<f32, u8, u32> = Layer::new()
   .x(&[1.0, 2.0, 3.0, 4.0])
@@ -45,7 +46,7 @@ let layer1: Layer<f32, u8, u32> = Layer::new()
  let plot = PlotBuilder::new(Backend::Plotly)
    .display(true)
    .add_layer(Plot::scatter(layer1))
-   .add_layer(Plot::scatter(layer2))
+   .add_layer(Plot::line(layer2))
    .build();
  
  plot.render();
@@ -70,7 +71,7 @@ Currently, there is only one supported backend: Plotly.js. It is quite easy to b
 interactivity, and renders in a browser (so you don't need additional software, unless you don't have a browser, in
 which case, how are you reading this?). Other backends are planned, however:
 
-- [ ] Plotly.js
+- [x] Plotly.js
 - [ ] matplotlib
 - [ ] asciiplot
 - [ ] gnuplot
