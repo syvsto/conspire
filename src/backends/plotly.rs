@@ -91,8 +91,6 @@ impl Renderable for Plotly {
 
         let html = Plotly::html(self.build_javascript(data)?);
 
-        println!("{}", &html);
-
         write_to_file(&Path::new("render.html"), &html);
 
         if display {
@@ -124,13 +122,13 @@ where
         match self.plot {
             Plot::Scatter(p) => write!(
                 f,
-                "x: {:?}, y: {:?}, mode: 'marker', type: 'scatter',",
+                "x: {:?}, y: {:?}, mode: 'markers', type: 'scatter',",
                 p.get_x().expect("No X dimenison"),
                 p.get_y().expect("No Y dimension")
             ),
             Plot::Line(p) => write!(
                 f,
-                "x: {:?}, y: {:?}, mode: 'line', type: 'scatter',",
+                "x: {:?}, y: {:?}, mode: 'lines', type: 'scatter',",
                 p.get_x().expect("No X dimenison"),
                 p.get_y().expect("No Y dimension")
             ),
