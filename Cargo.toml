@@ -1,9 +1,14 @@
 [package]
 name = "conspire"
+description = "Generic plotting frontend"
+homepage = "https://github.com/syvsto/conspire"
+repository = "https://github.com/syvsto/conspire"
+documentation = "https://github.com/syvsto/conspire"
+licence = "MIT"
+readme = "readme.md"
 version = "0.1.0"
 authors = ["Syver <syver.storm.furru@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-num-traits = "0.2.6"
 ndarray = "0.12.1"
