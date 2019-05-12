@@ -1,17 +1,55 @@
 use core::fmt::Debug;
-use num_traits::Zero;
 
-pub trait Ordinal: Debug + Clone + Zero {}
-pub trait Nominal: Debug + Clone {}
-pub trait Quantitative: Debug + Clone + Zero {}
+type QuantitativeType = f64;
+type CategoricalType = String;
 
-impl Quantitative for f32 {}
-impl Quantitative for f64 {}
+pub enum DataType {
+    Quantitative(Vec<QuantitativeType>),
+    Categorical(Vec<String>),
+}
 
-impl Nominal for u8 {}
-impl Nominal for i8 {}
+pub trait Plottable: Debug {
+    fn to_conspire_data(&self) -> DataType;
+}
 
-impl Ordinal for u32 {}
-impl Ordinal for usize {}
-impl Ordinal for i32 {}
-impl Ordinal for isize {}
+impl Plottable for Vec<f32> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.iter().map(|x| QuantitativeType::from(*x)).collect::<Vec<QuantitativeType>>())
+    }
+}
+
+impl Plottable for Vec<f64> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.to_vec())
+    }
+}
+
+impl Plottable for Vec<u8> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.iter().map(|x| QuantitativeType::from(*x)).collect::<Vec<QuantitativeType>>())
+    }
+}
+
+impl Plottable for Vec<i8> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.iter().map(|x| QuantitativeType::from(*x)).collect::<Vec<QuantitativeType>>())
+    }
+}
+
+impl Plottable for Vec<u32> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.iter().map(|x| QuantitativeType::from(*x)).collect::<Vec<QuantitativeType>>())
+    }
+}
+
+impl Plottable for Vec<i32> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Quantitative(self.iter().map(|x| QuantitativeType::from(*x)).collect::<Vec<QuantitativeType>>())
+    }
+}
+
+impl Plottable for Vec<String> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Categorical(self.to_vec())
+    }
+}

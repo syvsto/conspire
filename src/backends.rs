@@ -1,5 +1,4 @@
 use crate::Plot;
-use crate::data::{Quantitative, Nominal, Ordinal};
 
 use std::error;
 
@@ -22,5 +21,5 @@ impl Backend {
 }
 
 pub trait Renderable {
-    fn render<T, U, V>(&self, data: &[Plot<T, U, V>], display: bool) -> Result<()> where T: Quantitative, U: Nominal, V: Ordinal;
+    fn render(&self, data: &[Plot], display: bool) -> Result<()>;
 }

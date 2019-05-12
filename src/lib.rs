@@ -29,13 +29,14 @@
 //! use conspire::{Backend, PlotBuilder, Plot, Layer};
 //! use conspire::channels::{PositionX, PositionY, Color, Size};
 //! 
-//! let layer1: Layer<f32, u8, u32> = Layer::new()
-//!    .x(&[1.0, 2.0, 3.0, 4.0])
-//!    .y(&[8.0, 7.0, 5.0, 4.0]);
-//!  
-//!  let layer2: Layer<f32, u8, u32> = Layer::new()
-//!    .x(&[1.0, 2.0, 3.0, 4.0])
-//!    .y(&[9.0, 1.0, 10.0, 11.0]);
+//! let layer1 = Layer::new()
+//!     .x(vec![1.0, 1.3, 2.0, 1.7, 3.0, 4.0])
+//!     .y(vec![8.0, 8.1, 7.0, 6.4, 5.0, 4.0]);
+//!
+//! let layer2 = Layer::new()
+//!     .x(vec![1.0, 2.0, 3.0, 4.0])
+//!     .y(vec![9.0, 1.0, 10.0, 11.0])
+//!     .color(vec![1,2,3,4]);
 //!  
 //!  let plot = PlotBuilder::new(Backend::Plotly)
 //!    .display(true)
@@ -65,38 +66,37 @@ pub use backends::Backend;
 pub use error::DimensionError;
 pub use layer::Layer;
 use backends::*;
-use data::{Quantitative, Nominal, Ordinal};
 
-pub enum Plot<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
-    Scatter(Layer<T, U, V>),
-    Line(Layer<T, U, V>),
-    Bar(Layer<T, U, V>),
-    Pie(Layer<T, U, V>),
-    HorizontalBar(Layer<T, U, V>),
+pub enum Plot {
+    Scatter(Layer),
+    Line(Layer),
+    Bar(Layer),
+    Pie(Layer),
+    HorizontalBar(Layer),
 }
 
-impl<T, U, V> Plot<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
-    pub fn scatter(plot: Layer<T, U, V>) -> Self {
+impl Plot {
+    pub fn scatter(plot: Layer) -> Self {
         Plot::Scatter(plot)
     }
 
-    pub fn line(plot: Layer<T, U, V>) -> Self {
+    pub fn line(plot: Layer) -> Self {
         Plot::Line(plot)
     }
 
-    pub fn bar(plot: Layer<T, U, V>) -> Self {
+    pub fn bar(plot: Layer) -> Self {
         Plot::Bar(plot)
     }
 
-    pub fn pie(plot: Layer<T, U, V>) -> Self {
+    pub fn pie(plot: Layer) -> Self {
         Plot::Pie(plot)
     }
 
-    pub fn horizontal_bar(plot: Layer<T, U, V>) -> Self {
+    pub fn horizontal_bar(plot: Layer) -> Self {
         Plot::HorizontalBar(plot)
     }
 
-    fn get_layer(&self) -> &Layer<T, U, V> {
+    fn get_layer(&self) -> &Layer {
         match self {
             Plot::Scatter(l) => &l,
             Plot::Line(l) => &l,
@@ -110,13 +110,13 @@ impl<T, U, V> Plot<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
 /// Constructs a new plot
 ///
 /// To make a plot, make a 
-pub struct PlotBuilder<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal{
+pub struct PlotBuilder{
     backend: Backend,
     display: bool,
-    data: Vec<Plot<T, U, V>>,
+    data: Vec<Plot>,
 }
 
-impl<T, U, V> PlotBuilder<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
+impl PlotBuilder {
     pub fn new(backend: Backend) -> Self {
         Self {
             backend,
@@ -130,7 +130,7 @@ impl<T, U, V> PlotBuilder<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal
         self
     }
 
-    pub fn add_layer(mut self, data: Plot<T, U, V>) -> Self {
+    pub fn add_layer(mut self, data: Plot) -> Self {
         self.data.push(data);
         self
     }
@@ -140,7 +140,7 @@ impl<T, U, V> PlotBuilder<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal
         self
     }
 
-    pub fn build(self) -> PlotSystem<T, U, V> {
+    pub fn build(self) -> PlotSystem {
         if self.data.len() < 1 { panic!("Cannot make a plot without data") };
 
         PlotSystem {
@@ -151,13 +151,13 @@ impl<T, U, V> PlotBuilder<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal
     }
 }
 
-pub struct PlotSystem<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
+pub struct PlotSystem {
     backend: Backend,
     display: bool,
-    data: Vec<Plot<T, U, V>>,
+    data: Vec<Plot>,
 }
 
-impl<T, U, V> PlotSystem<T, U, V> where T: Quantitative, U: Nominal, V: Ordinal {
+impl PlotSystem {
     pub fn render(&self) {
         let backend = self.backend.clone();
         let _ = backend.to_struct().render(&self.data, self.display);
