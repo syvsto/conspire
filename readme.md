@@ -5,7 +5,7 @@ plots. It supports multiple backends, so you can render to SVG, to a terminal, t
 as you see fit.
 
 *Beware*: In an extremely early stage, still settling on a design. Only has a single backend, only a few available
-plots, and will probably eat all your precious data (or maybe not, but who knows). 
+plots, and may possibly be mean to your data.
 
 ### Goals
 
@@ -13,8 +13,10 @@ plots, and will probably eat all your precious data (or maybe not, but who knows
    scatterplots and line charts. Conspire aims to also provide various plots for statistics, 3D charts, statistical
    plots, and various scientific charts for applicable backends.
    
-* Flexibility. Allow for specifying multiple different channels for each plot, and let the user display multiple
-  plots simultaneously, in different layouts.
+* Flexibility. The API should be flexible enough to handle many different data types, data should be easy to assign
+to user-specified channels, and be in control over the layout when multiple plots are presented at the same time.
+In addition, it should be possible to swap between different internal data representations to trade precision for
+memory if the need arises, and there should be a well-documented path to creating new backends.
   
 * Ease of use. The library should be easy to use, provide functions for working with a variety of popular data
   formats (such as [ndarray](https://docs.rs/ndarray/0.12.1/ndarray/) vectors/matrices), and gracefully handle
@@ -23,7 +25,8 @@ plots, and will probably eat all your precious data (or maybe not, but who knows
 ### Non-goals
 
 * A custom, Rust-based backend. There are a multitude of very good plotting libraries for many different use cases
-  out there, and a new, Rust-based one doesn't bring many benefits. I would rather spend time making a solid interface.
+  out there, and a new, Rust-based one doesn't bring many immediate benefits. I would rather spend time making a
+  solid interface.
   
 * The absolute best performance. Though Rust provides a lot of performance for free through it's zero-cost abstractions,
   conspire will not attempt to optimize all aspects of performance.
@@ -35,13 +38,13 @@ The following plot plots two lines using the Plotly backend.
 use conspire::{Backend, PlotBuilder, Plot, Layer};
 use conspire::channels::{PositionX, PositionY, Color, Size};
 
-let layer1: Layer<f32, u8, u32> = Layer::new()
-   .x(&[1.0, 1.3, 2.0, 1.7, 3.0, 4.0])
-   .y(&[8.0, 8.1, 7.0, 6.4, 5.0, 4.0]);
+let layer1 = Layer::new()
+   .x(vec![1.0, 1.3, 2.0, 1.7, 3.0, 4.0])
+   .y(vec![8.0, 8.1, 7.0, 6.4, 5.0, 4.0]);
  
- let layer2: Layer<f32, u8, u32> = Layer::new()
-  .x(&[1.0, 2.0, 3.0, 4.0])
-   .y(&[9.0, 1.0, 10.0, 11.0]);
+ let layer2 = Layer::new()
+   .x(vec![1.0, 2.0, 3.0, 4.0])
+   .y(vec![9.0, 1.0, 10.0, 11.0]);
  
  let plot = PlotBuilder::new(Backend::Plotly)
    .display(true)
@@ -52,8 +55,8 @@ let layer1: Layer<f32, u8, u32> = Layer::new()
  plot.render();
 ```
 
-To create a plot, you make one or more `Layer`s. A Layer is a generalized plot, specifying what data should go into
-which channels. In the above example, the data is assigned the x and y dimensions of two layers.
+To create a plot, you make one or more `Layer`s. A Layer is a generalization over different channels to which you
+can assign data. In the above example, the data is assigned the x and y dimensions of two layers.
 
 Once you've specified your layers, you need to assign them to actual plots. Create a `PlotBuilder` by specifying a
 backend, set whatever settings you want, and add each layer by converting it into a specific plot type. The `Plot`
@@ -100,6 +103,14 @@ different categories of plots I'd like to support as quickly as possible:
 ### Features
 
 In no particular order, here are some features I'd like to incorporate into a final design:
-- [ ] Automatic handling of different kinds of data: Quantitative, nominal and ordinal.
+- [x] Automatic handling of differences in categorical and quantitative data
+- [ ] Toggle between different internal datatypes depending on whether you need more precision or more memory
 - [ ] Layer creation directly from common data types: Vectors of tuples, nested vectors, ndarray matrices, etc.
-- [ ] Less type specification
+
+
+## Writing backends
+
+The backend is responsible for converting data from the generic representation used in conspire into a suitable
+representation for the backend, as well as handling the actual rendering of the plot. In time, each backend will be
+it's own crate. Backend creation will be more fully documented in time, for the time being, take a look at the
+Plotly backend in `src/backends/plotly.rs` to get an idea of how backends work.
