@@ -1,7 +1,5 @@
 use crate::data::{DataType, Plottable};
 
-use core::fmt::Debug;
-
 pub struct Layer {
     x: Option<DataType>,
     y: Option<DataType>,

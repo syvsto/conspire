@@ -10,8 +10,8 @@ pub enum DimensionError {
 impl fmt::Display for DimensionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            NoX => write!(f, "Missing X dimension"),
-            NoY => write!(f, "Missing X dimension"),
+            DimensionError::NoX => write!(f, "Missing X dimension"),
+            DimensionError::NoY => write!(f, "Missing X dimension"),
         }
     }
 }

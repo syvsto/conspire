@@ -57,7 +57,6 @@
 //! `PlotSystem`, which can be rendered.
 
 mod data;
-pub mod channels;
 mod backends;
 mod error;
 mod layer;

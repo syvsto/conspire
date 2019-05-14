@@ -1,8 +1,11 @@
 use super::Renderable;
 use crate::data::DataType;
 use crate::Plot;
+use crate::Layer;
 
 use std::error;
+use std::fmt;
+use core::fmt::Debug;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -69,6 +72,8 @@ impl Renderable for Plotly {
 
         let html = Plotly::html(self.build_javascript(data)?);
 
+        println!("{}", &html);
+
         write_to_file(&Path::new("render.html"), &html);
 
         if display {
@@ -90,45 +95,83 @@ impl Renderable for Plotly {
     }
 }
 
-impl<'a> std::fmt::Display for PlotlyPlot<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl<'a> fmt::Display for PlotlyPlot<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.plot {
-            Plot::Scatter(p) => write!(
-                f,
-                "x: {}, y: {}, mode: 'markers', type: 'scatter',",
-                dimension_to_text(p.get_x()).expect("No X dimension"),
-                dimension_to_text(p.get_y()).expect("No Y dimension")
-            ),
-            Plot::Line(p) => write!(
-                f,
-                "x: {}, y: {}, mode: 'lines', type: 'scatter',",
-                dimension_to_text(p.get_x()).expect("No X dimension"),
-                dimension_to_text(p.get_y()).expect("No Y dimension")
-            ),
-            Plot::Bar(p) => write!(
-                f,
-                "x: {}, y: {}, type: 'bar',",
-                dimension_to_text(p.get_x()).expect("No X dimension"),
-                dimension_to_text(p.get_y()).expect("No Y dimension")
-            ),
-            Plot::Pie(p) => write!(f, "x: {:?}, type: pie,", dimension_to_text(p.get_x()).expect("No X Dimension")),
-            Plot::HorizontalBar(p) => write!(
-                f,
-                "x: {}, y: {}, orientation: 'h', type: 'bar',",
-                dimension_to_text(p.get_x()).expect("No X dimension"),
-                dimension_to_text(p.get_y()).expect("No Y dimension")
-            ),
+            Plot::Scatter(p) => stringify_2d_plot(f, "mode: 'markers', type: 'scatter'", p),
+            Plot::Line(p) => stringify_2d_plot(f, "mode: 'lines', type: 'scatter'", p),
+            Plot::Bar(p) => stringify_2d_plot(f, "type: 'bar'", p),
+            Plot::Pie(p) => stringify_1d_plot(f, "type: 'pie'", p),
+            Plot::HorizontalBar(p) => stringify_2d_plot(f, "orientation: 'h', type: 'bar'", p)
         }
+    }
+}
+
+fn stringify_2d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
+    assert!(p.get_x().is_some() && p.get_y().is_some());
+
+    let x = AttributePair::new("x", p.get_x());
+    let y = AttributePair::new("y", p.get_y());
+    let color = AttributePair::new("color", p.get_color());
+    let size = AttributePair::new("size", p.get_size());
+
+    if color.value.is_none() && size.value.is_none() {
+        write!(f, "{} {} {}", x, y, plot_definition)
+    } else {
+        write!(f, "{} {} {}, marker: {{ {} {} }}", x, y, plot_definition, color, size)
+    }
+}
+
+fn stringify_1d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
+    assert!(p.get_x().is_some());
+
+    let x = AttributePair::new("x", p.get_x());
+    let color = AttributePair::new("color", p.get_color());
+    let size = AttributePair::new("size", p.get_size());
+
+    if color.value.is_none() && size.value.is_none() {
+        write!(f, "{} {}", x, plot_definition)
+    } else {
+        write!(f, "{} {}, marker: {{ {} {} }}", x, plot_definition, color, size)
     }
 }
 
 fn dimension_to_text(data: &Option<DataType>) -> Option<String> {
     if let Some(d) = data {
         match d {
-            DataType::Quantitative(v) => Some(format!("{:?}", v)),
-            DataType::Categorical(v) => Some(format!("{:?}", v)),
+            DataType::Quantitative(v) => Some(format!("{}", stringify_data_vec(v))),
+            DataType::Categorical(v) => Some(format!("{}", stringify_data_vec(v))),
         }
     } else {
         None
+    }
+}
+
+fn stringify_data_vec<T: Debug>(v: &[T]) -> String {
+    if v.len() > 1 {
+        format!("{:?}", v)
+    } else {
+        format!("{:?}", v[0])
+    }
+}
+
+struct AttributePair {
+    key: String,
+    value: Option<String>,
+}
+
+impl AttributePair {
+    fn new(key: &'static str, value: &Option<DataType>) -> Self {
+        Self {key: key.to_string(), value: dimension_to_text(value)}
+    }
+}
+
+impl fmt::Display for AttributePair {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(v) = &self.value {
+            write!(f, "{}: {},", self.key, v)
+        } else {
+            write!(f, "")
+        }
     }
 }
