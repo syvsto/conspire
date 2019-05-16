@@ -10,7 +10,7 @@ fn main() {
     let layer2 = Layer::new()
         .x(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0])
         .y(vec![9.0, 1.0, 10.0, 11.0, 11.0, 11.0, 11.0])
-        .color(vec!["blue".to_string()]);
+        .color(vec!["blue"]);
 
     let plot = PlotBuilder::new(Backend::Plotly)
         .display(true)

@@ -53,3 +53,11 @@ impl Plottable for Vec<String> {
         DataType::Categorical(self.to_vec())
     }
 }
+
+impl Plottable for Vec<&'static str> {
+    fn to_conspire_data(&self) -> DataType {
+        DataType::Categorical(self.iter().map(|x| {
+            x.to_string()
+        }).collect::<Vec<String>>())
+    }
+}
