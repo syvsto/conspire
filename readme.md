@@ -5,7 +5,8 @@ plots. Though Rust may not be the language of choice when it comes to visualizat
 oftentimes useful to visualize your data even when working in such application domains Rust handles well. To
 facilitate this, Conspire provides a quick-and-easy API and supports multiple backends, so you can render to SVG,
 to a terminal, to an IPython viewer or to a browser depending on what your needs are with regard to interactivity,
-speed, and dependencies.
+speed, and dependencies. In time, I hope to integrate with [excvr](https://github.com/google/evcxr) to allow for 
+a more interactive, Jupyter-based workflow.
 
 *Beware*: In an extremely early stage, still settling on a design. Only has a single backend, only a few available
 plots, and may possibly be mean to your data.
@@ -24,7 +25,7 @@ precision for memory if the need arises, and there should be a well-documented p
   [ndarray](https://docs.rs/ndarray/0.12.1/ndarray/) vectors/matrices), and gracefully handle different data types,
   be they quantitative, ordinal or nominal, without bothering the user with manually having to convert data or
   specify types. In addition, the handling of most mundane tasks such as setting up axes should happen under the
-  hood
+  hood.
   
 ### Non-goals
 
@@ -81,12 +82,14 @@ with it in the near future.
 ### Backends
 Currently, there is only one supported backend: Plotly.js. It is quite easy to build for, provides a lot of plots,
 interactivity, and renders in a browser (so you don't need additional software, unless you don't have a browser, in
-which case, how are you reading this?). Other backends are planned, however:
+which case, how are you reading this?). Other backends are planned, however (listed in order of priority):
 
-- [x] Plotly.js
-- [ ] matplotlib
-- [ ] some form of ascii plotting library
-- [ ] gr
+- [x] Plotly.js: Very good interactivity, JavaScript-based. As most people have a web-browser, Plotly allows you to be
+      dependency-free (discounting loading the Plotly library from a CDN)
+- [ ] gr: Very fast, C-based. 
+- [ ] matplotlib: Allows better interopability with the Python world, commonly used for data analysis tasks.
+- [ ] some form of ascii plotting library: For when you just want to see your plots in a terminal and don't want to bother with a full         graphical and interactive interface.
+
 
 ### Supported plots
 
@@ -106,6 +109,10 @@ different categories of plots I'd like to support as quickly as possible:
 - [ ] Histogram (with automatic binning)
 - [ ] SPLOM
 - [ ] Treemap
+
+**Scientific plots:**
+- [ ] Heatmap
+- [ ] Parallel Coordinates
 
 ### Features
 
