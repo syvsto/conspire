@@ -72,6 +72,8 @@ pub enum Plot {
     Bar(Layer),
     Pie(Layer),
     HorizontalBar(Layer),
+    Box(Layer),
+    SimpleHeatmap(Layer),
 }
 
 impl Plot {
@@ -95,6 +97,14 @@ impl Plot {
         Plot::HorizontalBar(plot)
     }
 
+    pub fn box(plot: Layer) -> Self {
+        Plot::Box(plot)
+    }
+
+    pub fn heatmap(plot: Layer) -> Self {
+        Plot::SimpleHeatmap(plot)
+    }
+    
     fn get_layer(&self) -> &Layer {
         match self {
             Plot::Scatter(l) => &l,
@@ -102,13 +112,13 @@ impl Plot {
             Plot::Bar(l) => &l,
             Plot::Pie(l) => &l,
             Plot::HorizontalBar(l) => &l,
+            Plot::Box(l) => &l,
+            Plot::SimpleHeatmap(l) => &l,
         }
     }
 }
 
-/// Constructs a new plot
-///
-/// To make a plot, make a 
+/// A plot under construction
 pub struct PlotBuilder{
     backend: Backend,
     display: bool,

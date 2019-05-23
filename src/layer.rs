@@ -5,6 +5,7 @@ pub struct Layer {
     y: Option<DataType>,
     color: Option<DataType>,
     size: Option<DataType>,
+    name: Option<String>,
 }
 
 impl Layer {
@@ -14,7 +15,13 @@ impl Layer {
             y: None,
             color: None,
             size: None,
+            name: None,
         }
+    }
+
+    pub fn name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
     }
 
     pub fn x(mut self, data: impl Plottable) -> Self {
@@ -51,5 +58,9 @@ impl Layer {
 
     pub fn get_size(&self) -> &Option<DataType> {
         &self.size
+    }
+
+    pub fn get_name(&self) -> &Option<String> {
+        &self.name
     }
 }

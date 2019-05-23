@@ -102,7 +102,9 @@ impl<'a> fmt::Display for PlotlyPlot<'a> {
             Plot::Line(p) => stringify_2d_plot(f, "mode: 'lines', type: 'scatter'", p),
             Plot::Bar(p) => stringify_2d_plot(f, "type: 'bar'", p),
             Plot::Pie(p) => stringify_1d_plot(f, "type: 'pie'", p),
-            Plot::HorizontalBar(p) => stringify_2d_plot(f, "orientation: 'h', type: 'bar'", p)
+            Plot::HorizontalBar(p) => stringify_2d_plot(f, "orientation: 'h', type: 'bar'", p),
+            Plot::SimpleHeatmap(p) => stringify_1d_matrix_plot(f, "type: 'heatmap'", p),
+            Plot::Box(p) => stringify_1d_plot(f, "type: 'box', boxpoints: 'Outliers'", p),
         }
     }
 }
@@ -112,27 +114,46 @@ fn stringify_2d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &
 
     let x = AttributePair::new("x", p.get_x());
     let y = AttributePair::new("y", p.get_y());
-    let color = AttributePair::new("color", p.get_color());
-    let size = AttributePair::new("size", p.get_size());
+    let base = format!("{} {} {}", x, y, plot_definition);
 
-    if color.value.is_none() && size.value.is_none() {
-        write!(f, "{} {} {}", x, y, plot_definition)
-    } else {
-        write!(f, "{} {} {}, marker: {{ {} {} }}", x, y, plot_definition, color, size)
-    }
+    stringify_plot(base, &p)
+}
+
+fn stringify_1d_matrix_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
+    assert!(p.get_x().is_some());
+    let x = AttributePair::new("z", p.get_x());
+    let base = format!("{} {}", x, plot_definition);
+
+    stringify_plot(base, &p)
 }
 
 fn stringify_1d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
     assert!(p.get_x().is_some());
 
     let x = AttributePair::new("x", p.get_x());
-    let color = AttributePair::new("color", p.get_color());
-    let size = AttributePair::new("size", p.get_size());
+    let base = format!("{} {}", x, plot_definition);
 
-    if color.value.is_none() && size.value.is_none() {
-        write!(f, "{} {}", x, plot_definition)
+    stringify_plot(base, &p)
+}
+
+fn stringify_plot(base: String, layer: &Layer) -> fmt::Result {
+    let color = AttributePair::new("color", layer.get_color());
+    let size = AttributePair::new("size", layer.get_size());
+    let name = AttributePair::new("name", layer.get_name());
+    let mut marker = String::new();
+
+    if color.value.is_some() {
+        marker = format!("{}", color);
+    }
+
+    if size.value.is_some() {
+        marker = format!("{} {}", marker, size);
+    }
+
+    if name.value.is_none() {
+        write!(f, "{}, marker: {{ {} }}", base, marker)
     } else {
-        write!(f, "{} {}, marker: {{ {} {} }}", x, plot_definition, color, size)
+        write!(f, "{}, marker: {{ {} }}, name: {}", base, marker, name)
     }
 }
 

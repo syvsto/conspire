@@ -17,6 +17,7 @@ fn main() {
         .add_layer(Plot::scatter(layer1))
         .add_layer(Plot::line(layer2))
         .build();
+    plonk
 
     plot.render();
 }
