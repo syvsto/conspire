@@ -62,7 +62,7 @@ impl Plotly {
 }
 
 struct PlotlyPlot<'a> {
-    plot: &'a Plot,
+    plot: &'a Plot<'a>,
 }
 
 impl Renderable for Plotly {
@@ -71,9 +71,6 @@ impl Renderable for Plotly {
         use std::path::Path;
 
         let html = Plotly::html(self.build_javascript(data)?);
-
-        println!("{}", &html);
-
         write_to_file(&Path::new("render.html"), &html);
 
         if display {
@@ -98,74 +95,93 @@ impl Renderable for Plotly {
 impl<'a> fmt::Display for PlotlyPlot<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.plot {
-            Plot::Scatter(p) => stringify_2d_plot(f, "mode: 'markers', type: 'scatter'", p),
-            Plot::Line(p) => stringify_2d_plot(f, "mode: 'lines', type: 'scatter'", p),
-            Plot::Bar(p) => stringify_2d_plot(f, "type: 'bar'", p),
-            Plot::Pie(p) => stringify_1d_plot(f, "type: 'pie'", p),
-            Plot::HorizontalBar(p) => stringify_2d_plot(f, "orientation: 'h', type: 'bar'", p),
-            Plot::SimpleHeatmap(p) => stringify_1d_matrix_plot(f, "type: 'heatmap'", p),
-            Plot::Box(p) => stringify_1d_plot(f, "type: 'box', boxpoints: 'Outliers'", p),
+            Plot::Scatter {x, y, color, size, name} => {
+                let type_str = "mode: 'markers', type: 'scatter'";
+                let base = type_to_string_2d(type_str, x, y);
+                let markers = markers_to_string(color, size);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            },
+            Plot::Line {x, y, color, size, name} => {
+                let type_str = "mode: 'lines', type: 'scatter'";
+                let base = type_to_string_2d(type_str, x, y);
+                let markers = markers_to_string(color, size);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            },
+            Plot::Bar {x, y, color, name} => {
+                let type_str = "type: 'bar'";
+                let base = type_to_string_2d(type_str, x, y);
+                let markers = markers_to_string(color, &None);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            },
+            Plot::Pie {x, color, name} => {
+                let type_str = "type: 'pie'";
+                let base = type_to_string_1d(type_str, x);
+                let markers = markers_to_string(color, &None);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            },
+            Plot::HorizontalBar {x, y, color, name} => { 
+                let type_str = "type: 'bar'";
+                let base = type_to_string_2d(type_str, x, y);
+                let markers = markers_to_string(color, &None);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            }
+            Plot::SimpleHeatmap {..} => unimplemented!(),
+            Plot::Box {x, color, name} => {
+                let type_str = "type: 'box', boxpoints: 'Outliers'";
+                let base = type_to_string_1d(type_str, x);
+                let markers = markers_to_string(color, &None);
+                let name = name_to_string(name);
+                write!(f, "{} {} {}", base, markers, name)
+            },
         }
     }
 }
 
-fn stringify_2d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
-    assert!(p.get_x().is_some() && p.get_y().is_some());
-
-    let x = AttributePair::new("x", p.get_x());
-    let y = AttributePair::new("y", p.get_y());
-    let base = format!("{} {} {}", x, y, plot_definition);
-
-    stringify_plot(base, &p)
+fn type_to_string_2d(plot_definition: &'static str, x: &DataType, y: &DataType) -> String {
+    let x = AttributePair::new("x", x);
+    let y = AttributePair::new("y", y);
+    format!("{} {} {}", x, y, plot_definition)
 }
 
-fn stringify_1d_matrix_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
-    assert!(p.get_x().is_some());
-    let x = AttributePair::new("z", p.get_x());
-    let base = format!("{} {}", x, plot_definition);
-
-    stringify_plot(base, &p)
+fn type_to_string_1d(plot_definition: &'static str, x: &DataType) -> String {
+    let x = AttributePair::new("x", x);
+    format!("{} {}", x, plot_definition)
 }
 
-fn stringify_1d_plot(f: &mut fmt::Formatter, plot_definition: &'static str, p: &Layer) -> fmt::Result {
-    assert!(p.get_x().is_some());
-
-    let x = AttributePair::new("x", p.get_x());
-    let base = format!("{} {}", x, plot_definition);
-
-    stringify_plot(base, &p)
-}
-
-fn stringify_plot(base: String, layer: &Layer) -> fmt::Result {
-    let color = AttributePair::new("color", layer.get_color());
-    let size = AttributePair::new("size", layer.get_size());
-    let name = AttributePair::new("name", layer.get_name());
+fn markers_to_string(color: &Option<DataType>, size: &Option<DataType>) -> String {
     let mut marker = String::new();
 
-    if color.value.is_some() {
+    if let Some(c) = color {
+        let color = AttributePair::new("color", c);
         marker = format!("{}", color);
     }
 
-    if size.value.is_some() {
+    if let Some(s) = size {
+        let size = AttributePair::new("size", s);
         marker = format!("{} {}", marker, size);
     }
-
-    if name.value.is_none() {
-        write!(f, "{}, marker: {{ {} }}", base, marker)
-    } else {
-        write!(f, "{}, marker: {{ {} }}, name: {}", base, marker, name)
-    }
+    
+    format!("{},", marker)
 }
 
-fn dimension_to_text(data: &Option<DataType>) -> Option<String> {
-    if let Some(d) = data {
-        match d {
-            DataType::Quantitative(v) => Some(format!("{}", stringify_data_vec(v))),
-            DataType::Categorical(v) => Some(format!("{}", stringify_data_vec(v))),
-        }
+fn name_to_string(name: &Option<String>) -> String {
+    if let Some(n) = name {
+        format!("name: \'{}\'", n)
     } else {
-        None
+        String::from("")
     }
+} 
+
+fn dimension_to_text(data: &DataType) -> String {
+        match data {
+            DataType::Quantitative(v) => format!("{}", stringify_data_vec(v)),
+            DataType::Categorical(v) => format!("{}", stringify_data_vec(v)),
+        }
 }
 
 fn stringify_data_vec<T: Debug>(v: &[T]) -> String {
@@ -178,21 +194,17 @@ fn stringify_data_vec<T: Debug>(v: &[T]) -> String {
 
 struct AttributePair {
     key: String,
-    value: Option<String>,
+    value: String,
 }
 
 impl AttributePair {
-    fn new(key: &'static str, value: &Option<DataType>) -> Self {
+    fn new(key: &'static str, value: &DataType) -> Self {
         Self {key: key.to_string(), value: dimension_to_text(value)}
     }
 }
 
 impl fmt::Display for AttributePair {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(v) = &self.value {
-            write!(f, "{}: {},", self.key, v)
-        } else {
-            write!(f, "")
-        }
+            write!(f, "{}: {},", self.key, self.value)
     }
 }

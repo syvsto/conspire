@@ -19,11 +19,15 @@ impl Layer {
         }
     }
 
-    pub fn name(mut self, name: String) -> Self {
-        self.name = Some(name);
+    pub fn name<'a>(mut self, name: &'a str) -> Self {
+        self.name = Some(name.to_string());
         self
     }
 
+    pub fn get_name(&self) -> &Option<String> {
+        &self.name
+    }
+    
     pub fn x(mut self, data: impl Plottable) -> Self {
         self.x = Some(data.to_conspire_data());
         self
@@ -58,9 +62,5 @@ impl Layer {
 
     pub fn get_size(&self) -> &Option<DataType> {
         &self.size
-    }
-
-    pub fn get_name(&self) -> &Option<String> {
-        &self.name
     }
 }

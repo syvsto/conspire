@@ -65,67 +65,128 @@ pub use backends::Backend;
 pub use error::DimensionError;
 pub use layer::Layer;
 use backends::*;
+use data::DataType;
 
-pub enum Plot {
-    Scatter(Layer),
-    Line(Layer),
-    Bar(Layer),
-    Pie(Layer),
-    HorizontalBar(Layer),
-    Box(Layer),
-    SimpleHeatmap(Layer),
+pub enum Plot<'a> {
+    Scatter {
+        x: &'a DataType,
+        y: &'a DataType,
+        color: &'a Option<DataType>,
+        size: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    Line {
+        x: &'a DataType,
+        y: &'a DataType,
+        color: &'a Option<DataType>,
+        size: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    Bar {
+        x: &'a DataType,
+        y: &'a DataType,
+        color: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    Pie {
+        x: &'a DataType,
+        color: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    HorizontalBar{
+        x: &'a DataType,
+        y: &'a DataType,
+        color: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    Box {
+        x: &'a DataType,
+        color: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
+    SimpleHeatmap {
+        x: &'a DataType,
+        y: &'a DataType,
+        color: &'a Option<DataType>,
+        size: &'a Option<DataType>,
+        name: &'a Option<String>,
+    },
 }
 
-impl Plot {
-    pub fn scatter(plot: Layer) -> Self {
-        Plot::Scatter(plot)
+impl<'a> Plot<'a> {
+    pub fn scatter(plot: &'a Layer) -> Plot<'a> {
+        Plot::Scatter {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            y: plot.get_y().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            size: plot.get_size(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn line(plot: Layer) -> Self {
-        Plot::Line(plot)
+    pub fn line(plot: &'a Layer) -> Plot<'a> {
+        Plot::Line {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            y: plot.get_y().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            size: plot.get_size(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn bar(plot: Layer) -> Self {
-        Plot::Bar(plot)
+    pub fn bar(plot: &'a Layer) -> Plot<'a> {
+        Plot::Bar {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            y: plot.get_y().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn pie(plot: Layer) -> Self {
-        Plot::Pie(plot)
+    pub fn pie(plot: &'a Layer) -> Plot<'a> {
+        Plot::Pie {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn horizontal_bar(plot: Layer) -> Self {
-        Plot::HorizontalBar(plot)
+    pub fn horizontal_bar(plot: &'a Layer) -> Plot<'a> {
+        Plot::HorizontalBar {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            y: plot.get_y().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn box(plot: Layer) -> Self {
-        Plot::Box(plot)
+    pub fn boxplot(plot: &'a Layer) -> Plot<'a> {
+        Plot::Box {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            color: plot.get_color(),
+            name: plot.get_name(),
+        }
     }
 
-    pub fn heatmap(plot: Layer) -> Self {
-        Plot::SimpleHeatmap(plot)
-    }
-    
-    fn get_layer(&self) -> &Layer {
-        match self {
-            Plot::Scatter(l) => &l,
-            Plot::Line(l) => &l,
-            Plot::Bar(l) => &l,
-            Plot::Pie(l) => &l,
-            Plot::HorizontalBar(l) => &l,
-            Plot::Box(l) => &l,
-            Plot::SimpleHeatmap(l) => &l,
+    pub fn heatmap(plot: &'a Layer) -> Plot<'a> {
+        Plot::SimpleHeatmap {
+            x: plot.get_x().as_ref().expect("No X axis found"),
+            y: plot.get_y().as_ref().expect("No Y axis found"),
+            color: plot.get_color(),
+            size: plot.get_size(),
+            name: plot.get_name(),
         }
     }
 }
 
 /// A plot under construction
-pub struct PlotBuilder{
+pub struct PlotBuilder<'a> {
     backend: Backend,
     display: bool,
-    data: Vec<Plot>,
+    data: Vec<Plot<'a>>,
 }
 
-impl PlotBuilder {
+impl<'a> PlotBuilder<'a> {
     pub fn new(backend: Backend) -> Self {
         Self {
             backend,
@@ -139,7 +200,7 @@ impl PlotBuilder {
         self
     }
 
-    pub fn add_layer(mut self, data: Plot) -> Self {
+    pub fn add_layer(mut self, data: Plot<'a>) -> Self {
         self.data.push(data);
         self
     }
@@ -149,7 +210,7 @@ impl PlotBuilder {
         self
     }
 
-    pub fn build(self) -> PlotSystem {
+    pub fn build(self) -> PlotSystem<'a> {
         if self.data.len() < 1 { panic!("Cannot make a plot without data") };
 
         PlotSystem {
@@ -160,13 +221,13 @@ impl PlotBuilder {
     }
 }
 
-pub struct PlotSystem {
+pub struct PlotSystem<'a> {
     backend: Backend,
     display: bool,
-    data: Vec<Plot>,
+    data: Vec<Plot<'a>>,
 }
 
-impl PlotSystem {
+impl<'a> PlotSystem<'a> {
     pub fn render(&self) {
         let backend = self.backend.clone();
         let _ = backend.to_struct().render(&self.data, self.display);
