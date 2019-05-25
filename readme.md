@@ -17,27 +17,32 @@ plots, and may possibly be mean to your data.
    scatterplots and line charts. Conspire aims to also provide various plots for statistics, 3D charts, statistical
    plots, and various scientific charts for applicable backends.
    
-* Flexibility. In addition, it should be possible to swap between different internal data representations to trade
-precision for memory if the need arises, and there should be a well-documented path to creating new backends.
+* Backend-agnosticity. Implementing a new backend shouldn't require anything more than implementing the
+   `Renderable` trait and creating the specific representation required by the backend. Where possible, helper
+   utilites, such as command handling for external display programs, and generic representations of common elements
+   (e.g. key/value pairs) should be available.
   
 * Ease of use. Making a plot using this library should be as no-fuss of an experience as possible. Therefore, it
   should provide functions for working with a variety of popular data formats (such as
   [ndarray](https://docs.rs/ndarray/0.12.1/ndarray/) vectors/matrices), and gracefully handle different data types,
-  be they quantitative, ordinal or nominal, without bothering the user with manually having to convert data or
-  specify types. In addition, the handling of most mundane tasks such as setting up axes should happen under the
-  hood.
+  be they quantitative, ordinal or nominal. 
   
 ### Non-goals
 
 * A custom, Rust-based backend. There are a multitude of very good plotting libraries for many different use cases
   out there, and a new, Rust-based one doesn't bring many immediate benefits. I would rather spend time making a
   solid interface, and possibly interface with other people's pure-rust plotting libraries.
+
+* Maximum flexibility. Conspire should be quick and easy to use, and will choose ease of use over flexibility where
+the two are at odds. For instance, handling "mundane" tasks such as rendering axes should happen automatically.
+This also means things like manual multiplot layouts aren't of the top priority.
   
-* The absolute best performance. Though Rust provides a lot of performance for free through it's zero-cost abstractions,
-  conspire will not attempt to optimize all aspects of performance.
+* The absolute best performance. Though Rust provides a lot of performance for free through it's zero-cost
+  abstractions, conspire will not attempt to optimize all aspects of performance.
   
 ## How to use
-The following plot plots two lines using the Plotly backend.
+The following will render a line and a scatterplot in the same chart, presented in the browser by the Plotly.js
+backend:
 
 ```rust
 use conspire::{Backend, Layer, Plot, PlotBuilder};
@@ -56,8 +61,8 @@ fn main() {
 
     let plot = PlotBuilder::new(Backend::Plotly)
         .display(true)
-        .add_layer(Plot::scatter(layer1))
-        .add_layer(Plot::line(layer2))
+        .add_layer(Plot::scatter(&layer1))
+        .add_layer(Plot::line(&layer2))
         .build();
 
     plot.render();
@@ -105,8 +110,8 @@ different categories of plots I'd like to support as quickly as possible:
 - [x] Line chart
 
 **Statistical plots:**
-- [ ] Box plot
-- [ ] Histogram (with automatic binning)
+- [x] Box plot
+- [ ] Histogram (automatic binning)
 - [ ] SPLOM
 - [ ] Treemap
 
