@@ -1,14 +1,14 @@
-use crate::data::{DataType, Plottable};
+use crate::data::{Plottable};
 
-pub struct Layer {
-    x: Option<DataType>,
-    y: Option<DataType>,
-    color: Option<DataType>,
-    size: Option<DataType>,
+pub struct Layer<T> {
+    x: Option<T>,
+    y: Option<T>,
+    color: Option<T>,
+    size: Option<T>,
     name: Option<String>,
 }
 
-impl Layer {
+impl<T> Layer<T> {
     pub fn new() -> Self {
         Self {
             x: None,
@@ -28,39 +28,39 @@ impl Layer {
         &self.name
     }
     
-    pub fn x(mut self, data: impl Plottable) -> Self {
+    pub fn x(mut self, data: impl Plottable<D = T>) -> Self {
         self.x = Some(data.to_conspire_data());
         self
     }
 
-    pub fn get_x(&self) -> &Option<DataType> {
+    pub fn get_x(&self) -> &Option<T> {
         &self.x
     }
 
-    pub fn y(mut self, data: impl Plottable) -> Self {
+    pub fn y(mut self, data: impl Plottable<D = T>) -> Self {
         self.y = Some(data.to_conspire_data());
         self
     }
 
-    pub fn get_y(&self) -> &Option<DataType> {
+    pub fn get_y(&self) -> &Option<T> {
         &self.y
     }
 
-    pub fn color(mut self, data: impl Plottable) -> Self {
+    pub fn color(mut self, data: impl Plottable<D = T>) -> Self {
         self.color = Some(data.to_conspire_data());
         self
     }
 
-    pub fn get_color(&self) -> &Option<DataType> {
+    pub fn get_color(&self) -> &Option<T> {
         &self.color
     }
 
-    pub fn size(mut self, data: impl Plottable) -> Self {
+    pub fn size(mut self, data: impl Plottable<D = T>) -> Self {
         self.size = Some(data.to_conspire_data());
         self
     }
 
-    pub fn get_size(&self) -> &Option<DataType> {
+    pub fn get_size(&self) -> &Option<T> {
         &self.size
     }
 }

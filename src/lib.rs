@@ -65,56 +65,54 @@ pub use backends::Backend;
 pub use error::DimensionError;
 pub use layer::Layer;
 use backends::*;
-use data::DataType;
+use data::{ VectorData, MatrixData };
 
 pub enum Plot<'a> {
     Scatter {
-        x: &'a DataType,
-        y: &'a DataType,
-        color: &'a Option<DataType>,
-        size: &'a Option<DataType>,
+        x: &'a VectorData,
+        y: &'a VectorData,
+        color: &'a Option<VectorData>,
+        size: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     Line {
-        x: &'a DataType,
-        y: &'a DataType,
-        color: &'a Option<DataType>,
-        size: &'a Option<DataType>,
+        x: &'a VectorData,
+        y: &'a VectorData,
+        color: &'a Option<VectorData>,
+        size: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     Bar {
-        x: &'a DataType,
-        y: &'a DataType,
-        color: &'a Option<DataType>,
+        x: &'a VectorData,
+        y: &'a VectorData,
+        color: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     Pie {
-        x: &'a DataType,
-        color: &'a Option<DataType>,
+        x: &'a VectorData,
+        color: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     HorizontalBar{
-        x: &'a DataType,
-        y: &'a DataType,
-        color: &'a Option<DataType>,
+        x: &'a VectorData,
+        y: &'a VectorData,
+        color: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     Box {
-        x: &'a DataType,
-        color: &'a Option<DataType>,
+        x: &'a VectorData,
+        color: &'a Option<VectorData>,
         name: &'a Option<String>,
     },
     SimpleHeatmap {
-        x: &'a DataType,
-        y: &'a DataType,
-        color: &'a Option<DataType>,
-        size: &'a Option<DataType>,
+        z: &'a MatrixData,
+        color: &'a Option<MatrixData>,
         name: &'a Option<String>,
     },
 }
 
 impl<'a> Plot<'a> {
-    pub fn scatter(plot: &'a Layer) -> Plot<'a> {
+    pub fn scatter(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::Scatter {
             x: plot.get_x().as_ref().expect("No X axis found"),
             y: plot.get_y().as_ref().expect("No X axis found"),
@@ -124,7 +122,7 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn line(plot: &'a Layer) -> Plot<'a> {
+    pub fn line(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::Line {
             x: plot.get_x().as_ref().expect("No X axis found"),
             y: plot.get_y().as_ref().expect("No X axis found"),
@@ -134,7 +132,7 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn bar(plot: &'a Layer) -> Plot<'a> {
+    pub fn bar(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::Bar {
             x: plot.get_x().as_ref().expect("No X axis found"),
             y: plot.get_y().as_ref().expect("No X axis found"),
@@ -143,7 +141,7 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn pie(plot: &'a Layer) -> Plot<'a> {
+    pub fn pie(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::Pie {
             x: plot.get_x().as_ref().expect("No X axis found"),
             color: plot.get_color(),
@@ -151,7 +149,7 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn horizontal_bar(plot: &'a Layer) -> Plot<'a> {
+    pub fn horizontal_bar(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::HorizontalBar {
             x: plot.get_x().as_ref().expect("No X axis found"),
             y: plot.get_y().as_ref().expect("No X axis found"),
@@ -160,7 +158,7 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn boxplot(plot: &'a Layer) -> Plot<'a> {
+    pub fn boxplot(plot: &'a Layer<VectorData>) -> Plot<'a> {
         Plot::Box {
             x: plot.get_x().as_ref().expect("No X axis found"),
             color: plot.get_color(),
@@ -168,12 +166,10 @@ impl<'a> Plot<'a> {
         }
     }
 
-    pub fn heatmap(plot: &'a Layer) -> Plot<'a> {
+    pub fn heatmap(plot: &'a Layer<MatrixData>) -> Plot<'a> {
         Plot::SimpleHeatmap {
-            x: plot.get_x().as_ref().expect("No X axis found"),
-            y: plot.get_y().as_ref().expect("No Y axis found"),
+            z: plot.get_x().as_ref().expect("No Y axis found"),
             color: plot.get_color(),
-            size: plot.get_size(),
             name: plot.get_name(),
         }
     }

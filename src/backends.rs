@@ -4,6 +4,7 @@ use std::error;
 
 mod plotly;
 mod util;
+mod common;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
