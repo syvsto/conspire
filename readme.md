@@ -22,7 +22,7 @@ plots, and may possibly be mean to your data.
    utilites, such as command handling for external display programs, and generic representations of common elements
    (e.g. key/value pairs) should be available.
   
-* Ease of use. Making a plot using this library should be as no-fuss of an experience as possible. Therefore, it
+* Ergonomics. Making a plot using this library should be as no-fuss of an experience as possible. Therefore, it
   should provide functions for working with a variety of popular data formats (such as
   [ndarray](https://docs.rs/ndarray/0.12.1/ndarray/) vectors/matrices), and gracefully handle different data types,
   be they quantitative, ordinal or nominal. 
@@ -112,11 +112,10 @@ different categories of plots I'd like to support as quickly as possible:
 **Statistical plots:**
 - [x] Box plot
 - [ ] Histogram (automatic binning)
-- [ ] SPLOM
 - [ ] Treemap
 
 **Scientific plots:**
-- [ ] Heatmap
+- [x] Heatmap
 - [ ] Parallel Coordinates
 
 ### Features
